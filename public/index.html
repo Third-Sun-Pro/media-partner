@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Media Partner Agreement Generator — Utah Arts Festival</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: #1a1a1a;
+      color: #fff;
+      min-height: 100vh;
+    }
+
+    /* --- Header --- */
+    .app-header {
+      background: #000;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 3px solid #FCD100;
+    }
+    .app-header img { height: 40px; }
+    .app-header .header-right { display: flex; align-items: center; gap: 12px; }
+    .app-header button {
+      background: none;
+      border: 1px solid #555;
+      color: #aaa;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 12px;
+    }
+    .app-header button:hover { border-color: #FCD100; color: #FCD100; }
+
+    /* --- Login --- */
+    .login-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 80vh;
+      gap: 20px;
+    }
+    .login-screen img { height: 60px; margin-bottom: 8px; }
+    .login-screen h1 { font-size: 22px; font-weight: 800; color: #FCD100; }
+    .login-screen input {
+      padding: 12px 16px;
+      width: 300px;
+      border: 1px solid #444;
+      border-radius: 6px;
+      background: #2a2a2a;
+      color: #fff;
+      font-family: inherit;
+      font-size: 14px;
+    }
+    .login-screen input:focus { outline: none; border-color: #FCD100; }
+
+    /* --- Buttons --- */
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      font-family: inherit;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-primary { background: #FCD100; color: #000; }
+    .btn-primary:hover { background: #e5bf00; }
+    .btn-primary:disabled { background: #666; color: #999; cursor: not-allowed; }
+    .btn-secondary { background: #333; color: #fff; border: 1px solid #555; }
+    .btn-secondary:hover { border-color: #FCD100; color: #FCD100; }
+    .btn-green { background: #FFB2C2; color: #000; }
+    .btn-green:hover { background: #f09dae; }
+    .btn-danger { background: #dc3545; color: #fff; }
+    .btn-danger:hover { background: #c82333; }
+    .btn-small { padding: 6px 12px; font-size: 12px; }
+
+    /* --- Main container --- */
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    /* --- Dashboard --- */
+    .dashboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+    .dashboard-header h2 { font-size: 20px; font-weight: 800; color: #FCD100; }
+
+    .agreement-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .agreement-card {
+      background: #2a2a2a;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .agreement-card:hover { border-color: #FCD100; }
+    .agreement-card .partner-name { font-weight: 700; font-size: 15px; }
+    .agreement-card .meta { font-size: 12px; color: #888; margin-top: 4px; }
+    .agreement-card .actions { display: flex; gap: 8px; }
+    .status-badge {
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .status-draft { background: #444; color: #ccc; }
+    .status-final { background: #FFB2C2; color: #000; }
+    .status-badge { display: inline-flex; align-items: center; justify-content: center; }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #666;
+    }
+    .empty-state h3 { font-size: 18px; margin-bottom: 8px; color: #888; }
+
+    /* --- Upload area --- */
+    .upload-area {
+      border: 2px dashed #444;
+      border-radius: 12px;
+      padding: 48px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 20px;
+    }
+    .upload-area:hover, .upload-area.drag-over {
+      border-color: #FCD100;
+      background: rgba(252, 209, 0, 0.05);
+    }
+    .upload-area h3 { color: #FCD100; margin-bottom: 8px; }
+    .upload-area p { color: #888; font-size: 13px; }
+    .file-list { margin-top: 16px; text-align: left; }
+    .file-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      background: #2a2a2a;
+      border-radius: 4px;
+      margin: 4px 0;
+      font-size: 13px;
+    }
+    .file-item .remove { cursor: pointer; color: #dc3545; font-weight: 700; }
+
+    /* --- Editor --- */
+    .editor-section {
+      background: #2a2a2a;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .editor-section h3 {
+      font-size: 15px;
+      font-weight: 800;
+      color: #FCD100;
+      margin-bottom: 12px;
+      border-bottom: 1px solid #444;
+      padding-bottom: 8px;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .form-group {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .form-group label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #888;
+      text-transform: uppercase;
+    }
+    .form-group input, .form-group textarea {
+      padding: 8px 12px;
+      border: 1px solid #444;
+      border-radius: 4px;
+      background: #1a1a1a;
+      color: #fff;
+      font-family: inherit;
+      font-size: 13px;
+    }
+    .form-group input:focus, .form-group textarea:focus {
+      outline: none;
+      border-color: #FCD100;
+    }
+
+    /* --- Deliverables --- */
+    .deliverable-row {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      margin-bottom: 8px;
+      padding: 8px;
+      background: #1a1a1a;
+      border-radius: 4px;
+    }
+    .deliverable-row .qty { flex: 0.5; }
+    .deliverable-row .desc { flex: 2.5; }
+    .deliverable-row .dates { flex: 1.3; }
+    .deliverable-row .value { flex: 0.7; }
+    .deliverable-row input {
+      width: 100%;
+      padding: 6px 8px;
+      border: 1px solid #444;
+      border-radius: 4px;
+      background: #2a2a2a;
+      color: #fff;
+      font-family: inherit;
+      font-size: 12px;
+    }
+    .deliverable-row input:focus { outline: none; border-color: #FCD100; }
+    .deliverable-row .remove-row {
+      cursor: pointer;
+      color: #dc3545;
+      font-weight: 700;
+      padding: 6px;
+      font-size: 16px;
+      line-height: 1;
+    }
+
+    .add-row-btn {
+      background: none;
+      border: 1px dashed #555;
+      color: #888;
+      padding: 8px;
+      width: 100%;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: inherit;
+      margin-top: 4px;
+    }
+    .add-row-btn:hover { border-color: #FCD100; color: #FCD100; }
+
+    /* --- Quick-add suggestions --- */
+    .quick-add {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .quick-add button {
+      padding: 4px 10px;
+      border: 1px solid #444;
+      border-radius: 20px;
+      background: none;
+      color: #ccc;
+      font-family: inherit;
+      font-size: 11px;
+      cursor: pointer;
+    }
+    .quick-add button:hover { border-color: #FFB2C2; color: #FFB2C2; }
+
+    /* --- Status --- */
+    .status-bar {
+      text-align: center;
+      padding: 8px;
+      font-size: 13px;
+      color: #FCD100;
+    }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid #444;
+      border-top-color: #FCD100;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* --- Action bar --- */
+    .action-bar {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      margin-top: 16px;
+    }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <!-- LOGIN -->
+  <div id="login-screen" class="login-screen">
+    <img src="uaf-logo.png" alt="Utah Arts Festival">
+    <h1>Media Partner Agreements</h1>
+    <input type="password" id="login-password" placeholder="Enter password" onkeydown="if(event.key==='Enter')login()">
+    <button class="btn btn-primary" onclick="login()">Sign In</button>
+    <div id="login-error" style="color:#dc3545;font-size:13px"></div>
+  </div>
+
+  <!-- APP -->
+  <div id="app" class="hidden">
+    <header class="app-header">
+      <img src="uaf-logo.png" alt="Utah Arts Festival">
+      <div class="header-right">
+        <button onclick="showDashboard()">All Agreements</button>
+        <button onclick="logout()">Sign Out</button>
+      </div>
+    </header>
+
+    <div class="container">
+
+      <!-- DASHBOARD VIEW -->
+      <div id="dashboard-view">
+        <div class="dashboard-header">
+          <h2>Media Partner Agreements</h2>
+          <button class="btn btn-primary" onclick="startNewAgreement()">+ New Agreement</button>
+        </div>
+        <div id="agreement-list" class="agreement-list"></div>
+      </div>
+
+      <!-- EDITOR VIEW -->
+      <div id="editor-view" class="hidden">
+
+        <!-- Step 1: Upload -->
+        <div id="upload-step">
+          <div class="editor-section">
+            <h3>Upload Partner Documents</h3>
+            <p style="color:#888;font-size:13px;margin-bottom:16px">
+              Upload rate cards, proposals, contracts, or media kits. AI will extract the partner's offerings.
+            </p>
+            <div class="upload-area" id="upload-area"
+              ondragover="event.preventDefault();this.classList.add('drag-over')"
+              ondragleave="this.classList.remove('drag-over')"
+              ondrop="handleDrop(event)"
+              onclick="document.getElementById('file-input').click()">
+              <h3>Drop files here or click to browse</h3>
+              <p>PDF, DOCX, XLSX supported (up to 25MB each)</p>
+              <input type="file" id="file-input" multiple accept=".pdf,.docx,.xlsx,.xls" style="display:none" onchange="handleFiles(this.files)">
+            </div>
+            <div id="file-list" class="file-list"></div>
+            <div id="upload-status" class="status-bar"></div>
+            <div class="action-bar">
+              <button class="btn btn-secondary" onclick="skipUpload()">Skip — Enter Manually</button>
+              <button class="btn btn-primary" id="extract-btn" onclick="processDocuments()" disabled>Process Documents</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2: Editor -->
+        <div id="edit-step" class="hidden">
+          <!-- Partner Info -->
+          <div class="editor-section">
+            <h3>Partner Information</h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Organization Name</label>
+                <input type="text" id="partner-name">
+              </div>
+              <div class="form-group">
+                <label>Contact Person</label>
+                <input type="text" id="partner-contact">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="partner-email">
+              </div>
+              <div class="form-group">
+                <label>Phone</label>
+                <input type="text" id="partner-phone">
+              </div>
+            </div>
+          </div>
+
+          <!-- Financial Summary -->
+          <div class="editor-section">
+            <h3>Financial Summary</h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Agreement Date</label>
+                <input type="text" id="agreement-date" placeholder="mm/dd/yy">
+              </div>
+              <div class="form-group">
+                <label>Payment Due Date</label>
+                <input type="text" id="payment-due" placeholder="e.g. 7/1/26">
+              </div>
+              <div class="form-group">
+                <label>Year</label>
+                <input type="number" id="agreement-year" value="2026">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Festival Cash Spend ($)</label>
+                <input type="number" id="festival-cash" value="0" onchange="updateTotals()">
+              </div>
+              <div class="form-group">
+                <label>Partner In-Kind Value ($)</label>
+                <input type="number" id="partner-inkind" value="0" onchange="updateTotals()">
+              </div>
+              <div class="form-group">
+                <label>Total Media Value ($)</label>
+                <input type="number" id="total-value" value="0" readonly style="color:#FCD100;font-weight:700">
+              </div>
+            </div>
+          </div>
+
+          <!-- Partner Deliverables -->
+          <div class="editor-section">
+            <h3>Media Partner to Provide</h3>
+            <div class="deliverable-header form-row" style="margin-bottom:4px">
+              <div class="qty"><label>Qty</label></div>
+              <div class="desc"><label>Description</label></div>
+              <div class="dates"><label>Dates</label></div>
+              <div class="value"><label>Value ($)</label></div>
+              <div style="width:28px"></div>
+            </div>
+            <div id="partner-deliverables"></div>
+            <button class="add-row-btn" onclick="addPartnerRow()">+ Add Item</button>
+          </div>
+
+          <!-- Festival Deliverables -->
+          <div class="editor-section">
+            <h3>Festival to Provide</h3>
+            <div class="quick-add" id="quick-add-btns">
+              <button onclick="quickAdd('Festival Supporter level sponsorship recognition')">Sponsorship Level</button>
+              <button onclick="quickAdd('General admission tickets to the Utah Arts Festival')">Festival Tickets</button>
+              <button onclick="quickAdd('VIP Hospitality Patio passes')">VIP Passes</button>
+              <button onclick="quickAdd('Logo recognition on sponsor tower at the Festival')">Sponsor Tower</button>
+              <button onclick="quickAdd('Logo placement on sponsor page at uaf.org')">Website Logo</button>
+              <button onclick="quickAdd('On-site logo recognition in association with a Festival program')">On-site Logo</button>
+              <button onclick="quickAdd('Logo in printed program')">Program Logo</button>
+              <button onclick="quickAdd('Social media mentions')">Social Media</button>
+              <button onclick="quickAdd('Email newsletter inclusion')">Newsletter</button>
+              <button onclick="quickAdd('On-site booth/activation space')">Booth Space</button>
+              <button onclick="quickAdd('PA announcements during Festival')">PA Announcements</button>
+              <button onclick="quickAdd('Program advertisement')">Program Ad</button>
+            </div>
+            <div class="deliverable-header form-row" style="margin-bottom:4px">
+              <div class="qty"><label>Qty</label></div>
+              <div class="desc"><label>Description</label></div>
+              <div class="dates"><label>Dates</label></div>
+              <div class="value"><label>Value ($)</label></div>
+              <div style="width:28px"></div>
+            </div>
+            <div id="festival-deliverables"></div>
+            <button class="add-row-btn" onclick="addFestivalRow()">+ Add Item</button>
+          </div>
+
+          <!-- Notes -->
+          <div class="editor-section">
+            <h3>Notes</h3>
+            <div class="form-group">
+              <textarea id="agreement-notes" rows="3" placeholder="Any additional notes or special conditions..."></textarea>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="action-bar">
+            <button class="btn btn-secondary" onclick="showDashboard()">Cancel</button>
+            <button class="btn btn-green" onclick="saveCurrentAgreement('draft')">Save Draft</button>
+            <button class="btn btn-primary" onclick="saveAndGeneratePDF()">Save &amp; Generate PDF</button>
+          </div>
+          <div id="save-status" class="status-bar"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+// ---------------------------------------------------------------------------
+// State
+// ---------------------------------------------------------------------------
+let currentAgreementId = null;
+let uploadedFiles = [];
+
+// ---------------------------------------------------------------------------
+// Auth
+// ---------------------------------------------------------------------------
+async function checkAuth() {
+  const res = await fetch('/auth-check');
+  const data = await res.json();
+  if (data.authenticated) {
+    document.getElementById('login-screen').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden');
+    loadAgreements();
+  }
+}
+
+async function login() {
+  const pw = document.getElementById('login-password').value;
+  const res = await fetch('/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password: pw }),
+  });
+  if (res.ok) {
+    document.getElementById('login-screen').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden');
+    loadAgreements();
+  } else {
+    document.getElementById('login-error').textContent = 'Incorrect password';
+  }
+}
+
+async function logout() {
+  await fetch('/logout', { method: 'POST' });
+  location.reload();
+}
+
+// ---------------------------------------------------------------------------
+// Dashboard
+// ---------------------------------------------------------------------------
+function showDashboard() {
+  document.getElementById('dashboard-view').classList.remove('hidden');
+  document.getElementById('editor-view').classList.add('hidden');
+  currentAgreementId = null;
+  loadAgreements();
+}
+
+async function loadAgreements() {
+  const res = await fetch('/agreements');
+  const list = await res.json();
+  const container = document.getElementById('agreement-list');
+
+  if (list.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <h3>No agreements yet</h3>
+        <p>Click "+ New Agreement" to create your first media partner agreement.</p>
+      </div>`;
+    return;
+  }
+
+  // Sort newest first
+  list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+  container.innerHTML = list.map(a => `
+    <div class="agreement-card" onclick="loadAgreement('${a.id}')">
+      <div>
+        <div class="partner-name">${escapeHtml(a.partnerName)}</div>
+        <div class="meta">${a.date} &middot; ${formatCurrency(a.totalValue)}</div>
+      </div>
+      <div class="actions">
+        <span class="status-badge status-${a.status}">${a.status}</span>
+        <button class="btn btn-small btn-secondary" onclick="event.stopPropagation();downloadPDF('${a.id}')">PDF</button>
+        <button class="btn btn-small btn-danger" onclick="event.stopPropagation();deleteAgreementUI('${a.id}')">Delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function deleteAgreementUI(id) {
+  if (!confirm('Delete this agreement?')) return;
+  await fetch(`/agreements/${id}`, { method: 'DELETE' });
+  loadAgreements();
+}
+
+// ---------------------------------------------------------------------------
+// New agreement
+// ---------------------------------------------------------------------------
+function startNewAgreement() {
+  currentAgreementId = null;
+  uploadedFiles = [];
+  document.getElementById('dashboard-view').classList.add('hidden');
+  document.getElementById('editor-view').classList.remove('hidden');
+  document.getElementById('upload-step').classList.remove('hidden');
+  document.getElementById('edit-step').classList.add('hidden');
+  document.getElementById('file-list').innerHTML = '';
+  document.getElementById('upload-status').textContent = '';
+  document.getElementById('extract-btn').disabled = true;
+  resetEditor();
+}
+
+function skipUpload() {
+  document.getElementById('upload-step').classList.add('hidden');
+  document.getElementById('edit-step').classList.remove('hidden');
+}
+
+// ---------------------------------------------------------------------------
+// File upload
+// ---------------------------------------------------------------------------
+function handleDrop(e) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  handleFiles(e.dataTransfer.files);
+}
+
+function handleFiles(fileList) {
+  for (const file of fileList) {
+    uploadedFiles.push(file);
+  }
+  renderFileList();
+  document.getElementById('extract-btn').disabled = uploadedFiles.length === 0;
+}
+
+function removeFile(idx) {
+  uploadedFiles.splice(idx, 1);
+  renderFileList();
+  document.getElementById('extract-btn').disabled = uploadedFiles.length === 0;
+}
+
+function renderFileList() {
+  const container = document.getElementById('file-list');
+  container.innerHTML = uploadedFiles.map((f, i) => `
+    <div class="file-item">
+      <span>${escapeHtml(f.name)} (${(f.size / 1024 / 1024).toFixed(1)} MB)</span>
+      <span class="remove" onclick="removeFile(${i})">X</span>
+    </div>
+  `).join('');
+}
+
+// ---------------------------------------------------------------------------
+// Document extraction
+// ---------------------------------------------------------------------------
+async function processDocuments() {
+  const statusEl = document.getElementById('upload-status');
+  const btn = document.getElementById('extract-btn');
+  btn.disabled = true;
+  statusEl.innerHTML = '<span class="loading-spinner"></span> Processing documents with AI...';
+
+  const formData = new FormData();
+  for (const file of uploadedFiles) {
+    formData.append('files', file);
+  }
+
+  try {
+    const res = await fetch('/extract', { method: 'POST', body: formData });
+    const result = await res.json();
+
+    if (!result.success) {
+      statusEl.textContent = 'Error: ' + (result.error || 'Unknown error');
+      btn.disabled = false;
+      return;
+    }
+
+    // Populate editor with extracted data
+    populateFromExtraction(result.data);
+    statusEl.textContent = 'Extraction complete!';
+
+    // Show editor
+    document.getElementById('upload-step').classList.add('hidden');
+    document.getElementById('edit-step').classList.remove('hidden');
+  } catch (err) {
+    statusEl.textContent = 'Error: ' + err.message;
+    btn.disabled = false;
+  }
+}
+
+function populateFromExtraction(data) {
+  resetEditor();
+
+  if (data.partner) {
+    document.getElementById('partner-name').value = data.partner.name || '';
+    document.getElementById('partner-contact').value = data.partner.contact || '';
+    document.getElementById('partner-email').value = data.partner.email || '';
+    document.getElementById('partner-phone').value = data.partner.phone || '';
+  }
+
+  const partnerContainer = document.getElementById('partner-deliverables');
+  if (data.deliverables && data.deliverables.length > 0) {
+    for (const d of data.deliverables) {
+      addDeliverableRow(partnerContainer, d.description, d.dates, d.value);
+    }
+  } else {
+    addDeliverableRow(partnerContainer);
+  }
+
+  // Add one empty festival row
+  addDeliverableRow(document.getElementById('festival-deliverables'));
+
+  updateTotals();
+}
+
+// ---------------------------------------------------------------------------
+// Load existing agreement
+// ---------------------------------------------------------------------------
+async function loadAgreement(id) {
+  const res = await fetch(`/agreements/${id}`);
+  const agreement = await res.json();
+  currentAgreementId = id;
+
+  document.getElementById('dashboard-view').classList.add('hidden');
+  document.getElementById('editor-view').classList.remove('hidden');
+  document.getElementById('upload-step').classList.add('hidden');
+  document.getElementById('edit-step').classList.remove('hidden');
+
+  resetEditor();
+
+  // Partner info
+  document.getElementById('partner-name').value = agreement.partner?.name || '';
+  document.getElementById('partner-contact').value = agreement.partner?.contact || '';
+  document.getElementById('partner-email').value = agreement.partner?.email || '';
+  document.getElementById('partner-phone').value = agreement.partner?.phone || '';
+
+  // Financial
+  document.getElementById('agreement-date').value = agreement.date || '';
+  document.getElementById('agreement-year').value = agreement.year || 2026;
+  document.getElementById('payment-due').value = agreement.paymentDueDate || '';
+  document.getElementById('festival-cash').value = agreement.financialSummary?.festivalCashSpend || 0;
+  document.getElementById('agreement-notes').value = agreement.notes || '';
+
+  // Partner deliverables
+  const pc = document.getElementById('partner-deliverables');
+  if (agreement.partnerDeliverables?.length > 0) {
+    for (const d of agreement.partnerDeliverables) {
+      addDeliverableRow(pc, d.description, d.dates, d.value, d.qty);
+    }
+  } else {
+    addDeliverableRow(pc);
+  }
+
+  // Festival deliverables
+  const fc = document.getElementById('festival-deliverables');
+  if (agreement.festivalDeliverables?.length > 0) {
+    for (const d of agreement.festivalDeliverables) {
+      addDeliverableRow(fc, d.description, d.dates, d.value, d.qty);
+    }
+  } else {
+    addDeliverableRow(fc);
+  }
+
+  updateTotals();
+}
+
+// ---------------------------------------------------------------------------
+// Editor helpers
+// ---------------------------------------------------------------------------
+function resetEditor() {
+  document.getElementById('partner-name').value = '';
+  document.getElementById('partner-contact').value = '';
+  document.getElementById('partner-email').value = '';
+  document.getElementById('partner-phone').value = '';
+  const now = new Date();
+  document.getElementById('agreement-date').value = `${(now.getMonth()+1).toString().padStart(2,'0')}/${now.getDate().toString().padStart(2,'0')}/${now.getFullYear().toString().slice(-2)}`;
+  document.getElementById('agreement-year').value = new Date().getFullYear();
+  document.getElementById('payment-due').value = '';
+  document.getElementById('festival-cash').value = 0;
+  document.getElementById('partner-inkind').value = 0;
+  document.getElementById('total-value').value = 0;
+  document.getElementById('agreement-notes').value = '';
+  document.getElementById('partner-deliverables').innerHTML = '';
+  document.getElementById('festival-deliverables').innerHTML = '';
+  document.getElementById('save-status').textContent = '';
+}
+
+function addDeliverableRow(container, desc = '', dates = '', value = 0, qty = '') {
+  const row = document.createElement('div');
+  row.className = 'deliverable-row';
+  row.innerHTML = `
+    <div class="qty"><input type="text" value="${escapeHtml(String(qty || ''))}" placeholder="#"></div>
+    <div class="desc"><input type="text" value="${escapeHtml(desc || '')}" placeholder="Description" onchange="updateTotals()"></div>
+    <div class="dates"><input type="text" value="${escapeHtml(dates || '')}" placeholder="Date range"></div>
+    <div class="value"><input type="number" value="${value || 0}" min="0" onchange="updateTotals()"></div>
+    <span class="remove-row" onclick="this.parentElement.remove();updateTotals()">x</span>
+  `;
+  container.appendChild(row);
+}
+
+function addPartnerRow() {
+  addDeliverableRow(document.getElementById('partner-deliverables'));
+}
+
+function addFestivalRow(desc = '', dates = '', value = 0) {
+  addDeliverableRow(document.getElementById('festival-deliverables'), desc, dates, value);
+}
+
+function quickAdd(description) {
+  addFestivalRow(description);
+}
+
+function getDeliverables(containerId) {
+  const rows = document.querySelectorAll(`#${containerId} .deliverable-row`);
+  return Array.from(rows).map(row => {
+    const inputs = row.querySelectorAll('input');
+    return {
+      qty: inputs[0].value.trim(),
+      description: inputs[1].value.trim(),
+      dates: inputs[2].value.trim(),
+      value: parseFloat(inputs[3].value) || 0,
+    };
+  }).filter(d => d.description);
+}
+
+function updateTotals() {
+  const festivalCash = parseFloat(document.getElementById('festival-cash').value) || 0;
+  const partnerInKind = parseFloat(document.getElementById('partner-inkind').value) || 0;
+  document.getElementById('total-value').value = festivalCash + partnerInKind;
+}
+
+function buildAgreementData() {
+  const partnerDeliverables = getDeliverables('partner-deliverables');
+  const festivalDeliverables = getDeliverables('festival-deliverables');
+  const festivalCash = parseFloat(document.getElementById('festival-cash').value) || 0;
+  const partnerInKind = partnerDeliverables.reduce((sum, d) => sum + d.value, 0);
+
+  return {
+    year: parseInt(document.getElementById('agreement-year').value) || new Date().getFullYear(),
+    date: document.getElementById('agreement-date').value,
+    partner: {
+      name: document.getElementById('partner-name').value.trim(),
+      contact: document.getElementById('partner-contact').value.trim(),
+      email: document.getElementById('partner-email').value.trim(),
+      phone: document.getElementById('partner-phone').value.trim(),
+    },
+    financialSummary: {
+      festivalCashSpend: festivalCash,
+      partnerInKindValue: partnerInKind,
+      totalMediaValue: festivalCash + partnerInKind,
+    },
+    partnerDeliverables,
+    festivalDeliverables,
+    paymentDueDate: document.getElementById('payment-due').value.trim(),
+    notes: document.getElementById('agreement-notes').value.trim(),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Save / Generate
+// ---------------------------------------------------------------------------
+async function saveCurrentAgreement(status = 'draft') {
+  const data = buildAgreementData();
+  data.status = status;
+  const statusEl = document.getElementById('save-status');
+
+  try {
+    let res;
+    if (currentAgreementId) {
+      res = await fetch(`/agreements/${currentAgreementId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+    } else {
+      res = await fetch('/agreements', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+    }
+
+    const agreement = await res.json();
+    currentAgreementId = agreement.id;
+    statusEl.textContent = 'Saved!';
+    statusEl.style.color = '#FFB2C2';
+    setTimeout(() => { statusEl.textContent = ''; }, 3000);
+    return agreement;
+  } catch (err) {
+    statusEl.textContent = 'Error saving: ' + err.message;
+    statusEl.style.color = '#dc3545';
+    return null;
+  }
+}
+
+async function saveAndGeneratePDF() {
+  const statusEl = document.getElementById('save-status');
+  statusEl.innerHTML = '<span class="loading-spinner"></span> Saving and generating PDF...';
+  statusEl.style.color = '#FCD100';
+
+  const agreement = await saveCurrentAgreement('final');
+  if (!agreement) return;
+
+  downloadPDF(agreement.id);
+  statusEl.textContent = 'PDF generated!';
+  statusEl.style.color = '#FFB2C2';
+}
+
+function downloadPDF(id) {
+  window.open(`/agreements/${id}/pdf`, '_blank');
+}
+
+// ---------------------------------------------------------------------------
+// Utilities
+// ---------------------------------------------------------------------------
+function escapeHtml(str) {
+  if (!str) return '';
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+function formatCurrency(val) {
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }).format(val || 0);
+}
+
+// ---------------------------------------------------------------------------
+// Init
+// ---------------------------------------------------------------------------
+checkAuth();
+</script>
+</body>
+</html>

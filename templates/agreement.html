@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Montserrat', Arial, sans-serif;
+      color: #1a1a1a;
+      font-size: 9.5pt;
+      line-height: 1.35;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 14px;
+      border-bottom: 3px solid #FCD100;
+      padding-bottom: 10px;
+    }
+
+    .header img {
+      height: 44px;
+      margin-bottom: 6px;
+    }
+
+    .header h1 {
+      font-size: 16pt;
+      font-weight: 800;
+      color: #1a1a1a;
+      margin: 0;
+    }
+
+    .meta {
+      margin-bottom: 12px;
+    }
+
+    .meta p {
+      margin: 1px 0;
+      font-size: 9.5pt;
+    }
+
+    .meta strong {
+      font-weight: 700;
+    }
+
+    .financial-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 14px;
+      border-left: 3px solid #FCD100;
+    }
+
+    .financial-table td {
+      padding: 3px 12px;
+      font-size: 9.5pt;
+      vertical-align: top;
+    }
+
+    .financial-table .label {
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .financial-table .amount {
+      font-weight: 700;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .financial-table .note {
+      font-size: 8.5pt;
+      color: #555;
+      font-weight: 400;
+    }
+
+    .financial-table tr.total-row td {
+      border-top: 1px solid #ccc;
+      padding-top: 5px;
+      font-size: 10.5pt;
+      font-weight: 800;
+    }
+
+    .deliverables {
+      display: flex;
+      gap: 0;
+      margin-bottom: 24px;
+    }
+
+    .deliverables-column {
+      flex: 1;
+      padding: 0 12px;
+    }
+
+    .deliverables-column:first-child {
+      padding-left: 0;
+      border-right: 1px solid #ccc;
+    }
+
+    .deliverables-column:last-child {
+      padding-right: 0;
+    }
+
+    .deliverables-column h2 {
+      font-size: 10.5pt;
+      font-weight: 800;
+      margin-bottom: 6px;
+      color: #1a1a1a;
+      border-bottom: 2px solid #FCD100;
+      padding-bottom: 3px;
+    }
+
+    .deliverables-column ul {
+      padding-left: 16px;
+    }
+
+    .deliverables-column li {
+      margin: 6px 0;
+      font-size: 9pt;
+      line-height: 1.4;
+    }
+
+    .signatures {
+      display: flex;
+      gap: 30px;
+      margin-top: 32px;
+      padding-top: 16px;
+      border-top: 2px solid #FCD100;
+      page-break-inside: avoid;
+    }
+
+    .signature-block {
+      flex: 1;
+    }
+
+    .signature-block h3 {
+      font-size: 10pt;
+      font-weight: 800;
+      margin-bottom: 10px;
+      color: #1a1a1a;
+    }
+
+    .signature-line {
+      margin: 8px 0;
+      font-size: 9pt;
+    }
+
+    .signature-line span {
+      display: inline-block;
+      width: 220px;
+      border-bottom: 1px solid #333;
+      margin-left: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img src="{{LOGO_DATA_URI}}" alt="Utah Arts Festival">
+    <h1>{{YEAR}} Media Partner Agreement</h1>
+  </div>
+
+  <div class="meta">
+    <p><strong>Date:</strong> {{DATE}}</p>
+    <p><strong>Media Partner:</strong> {{PARTNER_NAME}}, {{PARTNER_CONTACT}}, {{PARTNER_EMAIL}}{{PARTNER_PHONE_DISPLAY}}</p>
+  </div>
+
+  <table class="financial-table">
+    <tr>
+      <td class="label">Festival cash spend: <span class="note">(partner to provide invoice to marketing@uaf.org)</span></td>
+      <td class="amount">{{FESTIVAL_CASH_SPEND}}</td>
+    </tr>
+    <tr>
+      <td class="label">Payment due:</td>
+      <td class="amount">{{PAYMENT_DUE_DATE}}</td>
+    </tr>
+    <tr>
+      <td class="label">Media Partner in-kind media value:</td>
+      <td class="amount">{{PARTNER_INKIND_VALUE}}</td>
+    </tr>
+    <tr class="total-row">
+      <td class="label">Total media value:</td>
+      <td class="amount">{{TOTAL_MEDIA_VALUE}}</td>
+    </tr>
+  </table>
+
+  <div class="deliverables">
+    <div class="deliverables-column">
+      <h2>Media Partner to provide:</h2>
+      <ul>
+        {{PARTNER_DELIVERABLES}}
+      </ul>
+    </div>
+    <div class="deliverables-column">
+      <h2>Festival to provide:</h2>
+      <ul>
+        {{FESTIVAL_DELIVERABLES}}
+      </ul>
+    </div>
+  </div>
+
+  <div class="signatures">
+    <div class="signature-block">
+      <h3>Media Partner Representative</h3>
+      <div class="signature-line">Name (printed): <span></span></div>
+      <div class="signature-line">Signature: <span></span></div>
+      <div class="signature-line">Signed Date: <span></span></div>
+    </div>
+    <div class="signature-block">
+      <h3>Festival Representative</h3>
+      <div class="signature-line">Name (printed): <span></span></div>
+      <div class="signature-line">Signature: <span></span></div>
+      <div class="signature-line">Signed Date: <span></span></div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,24 @@
+{
+  "name": "media-partner-generator",
+  "version": "1.0.0",
+  "description": "Media Partner Agreement Generator for Utah Arts Festival",
+  "scripts": {
+    "start": "node server.js",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.77.0",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.2.1",
+    "multer": "^2.0.2",
+    "puppeteer": "^24.0.0",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "supertest": "^7.2.2",
+    "vitest": "^4.0.18"
+  }
+}
