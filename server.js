@@ -7,7 +7,7 @@ const cookieParser = require("cookie-parser");
 const rateLimit = require("express-rate-limit");
 const { extractFromDocuments } = require("./extract");
 const { listAgreements, getAgreement, saveAgreement, updateAgreement, deleteAgreement } = require("./agreements");
-const { generatePDF } = require("./generate-pdf");
+const { generateAgreementHTML } = require("./generate-pdf");
 
 // ---------------------------------------------------------------------------
 // Structured logger
@@ -173,20 +173,16 @@ app.delete("/agreements/:id", requireAuth, (req, res) => {
 // ---------------------------------------------------------------------------
 // PDF generation
 // ---------------------------------------------------------------------------
-app.get("/agreements/:id/pdf", requireAuth, apiLimiter, async (req, res) => {
+app.get("/agreements/:id/pdf-html", requireAuth, apiLimiter, (req, res) => {
   const agreement = getAgreement(req.params.id);
   if (!agreement) return res.status(404).json({ error: "Agreement not found." });
 
   try {
-    log("info", "Generating PDF", { id: agreement.id, partner: agreement.partner?.name });
-    const pdfBuffer = await generatePDF(agreement);
-    const filename = `${agreement.partner?.name || "Agreement"}_Media_Partner_Agreement_${agreement.year}.pdf`
-      .replace(/[^a-zA-Z0-9_\-.]/g, "_");
-    res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", `inline; filename="${filename}"`);
-    res.send(pdfBuffer);
+    log("info", "Generating PDF HTML", { id: agreement.id, partner: agreement.partner?.name });
+    const html = generateAgreementHTML(agreement);
+    res.json({ html, filename: `${agreement.partner?.name || "Agreement"}_Media_Partner_Agreement_${agreement.year}.pdf`.replace(/[^a-zA-Z0-9_\-.]/g, "_") });
   } catch (err) {
-    log("error", "PDF generation failed", { error: err.message });
+    log("error", "PDF HTML generation failed", { error: err.message });
     res.status(500).json({ error: "Failed to generate PDF: " + err.message });
   }
 });
