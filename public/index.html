@@ -9,6 +9,8 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
+    html { color-scheme: dark; }
+
     body {
       font-family: 'Montserrat', sans-serif;
       background: #1a1a1a;
@@ -164,6 +166,7 @@
       border-radius: 4px;
       margin: 4px 0;
       font-size: 13px;
+      color: #fff;
     }
     .file-item .remove { cursor: pointer; color: #dc3545; font-weight: 700; }
 
@@ -225,10 +228,10 @@
       background: #1a1a1a;
       border-radius: 4px;
     }
-    .deliverable-row .qty { flex: 0.5; }
-    .deliverable-row .desc { flex: 2.5; }
-    .deliverable-row .dates { flex: 1.3; }
-    .deliverable-row .value { flex: 0.7; }
+    .deliverable-row .qty, .deliverable-header .qty { flex: 0.5; }
+    .deliverable-row .desc, .deliverable-header .desc { flex: 2.5; }
+    .deliverable-row .dates, .deliverable-header .dates { flex: 1.3; }
+    .deliverable-row .value, .deliverable-header .value { flex: 0.7; }
     .deliverable-row input {
       width: 100%;
       padding: 6px 8px;
@@ -595,7 +598,7 @@ async function loadAgreements() {
         <div class="meta">${a.date} &middot; ${formatCurrency(a.totalValue)}</div>
       </div>
       <div class="actions">
-        <span class="status-badge status-${a.status}">${a.status}</span>
+        <span class="status-badge status-${escapeHtml(a.status)}">${escapeHtml(a.status)}</span>
         <button class="btn btn-small btn-secondary" onclick="event.stopPropagation();downloadPDF('${a.id}')">PDF</button>
         <button class="btn btn-small btn-danger" onclick="event.stopPropagation();deleteAgreementUI('${a.id}')">Delete</button>
       </div>
@@ -1003,9 +1006,7 @@ async function confirmDownloadPDF() {
 // ---------------------------------------------------------------------------
 function escapeHtml(str) {
   if (!str) return '';
-  const d = document.createElement('div');
-  d.textContent = str;
-  return d.innerHTML;
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 function formatCurrency(val) {

@@ -101,9 +101,11 @@ async function extractFromDocuments(files) {
 
   // Parse JSON from response (handle markdown code blocks)
   const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/) || [null, text];
-  const parsed = JSON.parse(jsonMatch[1].trim());
-
-  return parsed;
+  try {
+    return JSON.parse(jsonMatch[1].trim());
+  } catch (e) {
+    throw new Error(`AI returned invalid JSON. Try uploading again or use a different file format. Raw: ${text.slice(0, 200)}`);
+  }
 }
 
 module.exports = { extractFromDocuments };
