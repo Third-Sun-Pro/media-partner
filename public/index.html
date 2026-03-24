@@ -311,6 +311,30 @@
     }
 
     .hidden { display: none !important; }
+
+    /* --- PDF Preview Modal --- */
+    .pdf-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100;
+      display: none; align-items: flex-start; justify-content: center; padding: 40px 20px;
+      overflow-y: auto;
+    }
+    .pdf-overlay.open { display: flex; }
+    .pdf-modal {
+      background: #fff; border-radius: 12px; width: 850px; max-width: 100%;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.5); overflow: hidden;
+    }
+    .pdf-modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 24px; background: #1a1a1a; border-bottom: 3px solid #FCD100;
+    }
+    .pdf-modal-header h3 { color: #FCD100; font-size: 16px; font-weight: 800; }
+    .pdf-modal-header .pdf-actions { display: flex; gap: 8px; }
+    .pdf-modal-close {
+      background: none; border: none; color: #888; font-size: 24px;
+      cursor: pointer; line-height: 1; padding: 0 4px;
+    }
+    .pdf-modal-close:hover { color: #fff; }
+    .pdf-modal-body { padding: 40px 60px; }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.2/html2pdf.bundle.min.js"></script>
 </head>
@@ -894,6 +918,8 @@ async function saveAndGeneratePDF() {
   statusEl.style.color = '#FFB2C2';
 }
 
+let pendingPdfData = null;
+
 async function downloadPDF(id) {
   const statusEl = document.getElementById('save-status');
   try {
@@ -901,30 +927,60 @@ async function downloadPDF(id) {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error);
 
-    // Create a hidden container, inject the HTML, and convert to PDF
+    // Store for download and show preview
+    pendingPdfData = data;
+    const previewBody = document.getElementById('pdfPreviewBody');
+    previewBody.innerHTML = data.html;
+    document.getElementById('pdfPreviewTitle').textContent =
+      (data.filename || 'Agreement').replace(/_/g, ' ').replace(/\.pdf$/i, '');
+    document.getElementById('pdfOverlay').classList.add('open');
+  } catch (err) {
+    if (statusEl) {
+      statusEl.textContent = 'PDF error: ' + err.message;
+      statusEl.style.color = '#e53e3e';
+    }
+  }
+}
+
+function closePdfPreview() {
+  document.getElementById('pdfOverlay').classList.remove('open');
+  pendingPdfData = null;
+}
+
+async function confirmDownloadPDF() {
+  if (!pendingPdfData) return;
+  const btn = document.getElementById('pdfDownloadBtn');
+  btn.disabled = true;
+  btn.textContent = 'Generating...';
+
+  try {
     const container = document.createElement('div');
-    container.innerHTML = data.html;
+    container.innerHTML = pendingPdfData.html;
     container.style.position = 'fixed';
     container.style.left = '-9999px';
     container.style.top = '0';
     container.style.width = '8.5in';
     document.body.appendChild(container);
 
+    // Wait for fonts and images to load
+    await document.fonts.ready;
+    await new Promise(r => setTimeout(r, 500));
+
     await html2pdf().set({
       margin: [0.5, 0.75, 0.5, 0.75],
-      filename: data.filename,
+      filename: pendingPdfData.filename,
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true },
+      html2canvas: { scale: 2, useCORS: true, logging: false },
       jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' },
       pagebreak: { mode: ['avoid-all', 'css', 'legacy'] },
     }).from(container).save();
 
     document.body.removeChild(container);
   } catch (err) {
-    if (statusEl) {
-      statusEl.textContent = 'PDF error: ' + err.message;
-      statusEl.style.color = '#e53e3e';
-    }
+    alert('PDF download failed: ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Download PDF';
   }
 }
 
@@ -947,5 +1003,19 @@ function formatCurrency(val) {
 // ---------------------------------------------------------------------------
 checkAuth();
 </script>
+
+<!-- PDF Preview Modal -->
+<div class="pdf-overlay" id="pdfOverlay" onclick="if(event.target===this)closePdfPreview()">
+  <div class="pdf-modal">
+    <div class="pdf-modal-header">
+      <h3 id="pdfPreviewTitle">Agreement Preview</h3>
+      <div class="pdf-actions">
+        <button class="btn btn-primary btn-small" id="pdfDownloadBtn" onclick="confirmDownloadPDF()">Download PDF</button>
+        <button class="pdf-modal-close" onclick="closePdfPreview()">&times;</button>
+      </div>
+    </div>
+    <div class="pdf-modal-body" id="pdfPreviewBody"></div>
+  </div>
+</div>
 </body>
 </html>
