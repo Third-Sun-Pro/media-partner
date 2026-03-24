@@ -449,7 +449,7 @@
               </div>
               <div class="form-group">
                 <label>Partner In-Kind Value ($)</label>
-                <input type="number" id="partner-inkind" value="0" onchange="updateTotals()">
+                <input type="number" id="partner-inkind" value="0" readonly style="opacity:0.7;cursor:default;" title="Calculated from partner deliverable values">
               </div>
               <div class="form-group">
                 <label>Total Media Value ($)</label>
@@ -837,7 +837,8 @@ function getDeliverables(containerId) {
 
 function updateTotals() {
   const festivalCash = parseFloat(document.getElementById('festival-cash').value) || 0;
-  const partnerInKind = parseFloat(document.getElementById('partner-inkind').value) || 0;
+  const partnerInKind = getDeliverables('partner-deliverables').reduce((sum, d) => sum + d.value, 0);
+  document.getElementById('partner-inkind').value = partnerInKind;
   document.getElementById('total-value').value = festivalCash + partnerInKind;
 }
 
@@ -845,7 +846,7 @@ function buildAgreementData() {
   const partnerDeliverables = getDeliverables('partner-deliverables');
   const festivalDeliverables = getDeliverables('festival-deliverables');
   const festivalCash = parseFloat(document.getElementById('festival-cash').value) || 0;
-  const partnerInKind = partnerDeliverables.reduce((sum, d) => sum + d.value, 0);
+  const partnerInKind = parseFloat(document.getElementById('partner-inkind').value) || 0;
 
   return {
     year: parseInt(document.getElementById('agreement-year').value) || new Date().getFullYear(),
