@@ -972,11 +972,24 @@ async function confirmDownloadPDF() {
 
   try {
     const container = document.createElement('div');
-    container.innerHTML = pendingPdfData.html;
+
+    // Parse the full HTML template to extract styles and body content
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(pendingPdfData.html, 'text/html');
+    const styles = doc.querySelectorAll('style');
+    const bodyContent = doc.body ? doc.body.innerHTML : pendingPdfData.html;
+
+    // Inject styles so they apply inside the container
+    styles.forEach(s => container.appendChild(s.cloneNode(true)));
+    const content = document.createElement('div');
+    content.innerHTML = bodyContent;
+    container.appendChild(content);
+
     container.style.position = 'fixed';
     container.style.left = '-9999px';
     container.style.top = '0';
     container.style.width = '8.5in';
+    container.style.background = '#fff';
     document.body.appendChild(container);
 
     // Wait for fonts and images to load
@@ -987,7 +1000,7 @@ async function confirmDownloadPDF() {
       margin: [0.5, 0.75, 0.5, 0.75],
       filename: pendingPdfData.filename,
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, logging: false },
+      html2canvas: { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff' },
       jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' },
       pagebreak: { mode: ['avoid-all', 'css', 'legacy'] },
     }).from(container).save();
