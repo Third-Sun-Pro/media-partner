@@ -428,6 +428,17 @@
             </div>
           </div>
 
+          <!-- Add Forgotten File -->
+          <div class="editor-section" style="padding:12px 16px">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <h3 style="margin:0;font-size:13px">Add a Document</h3>
+              <button class="btn btn-secondary btn-small" onclick="document.getElementById('additional-file-input').click()">Choose File</button>
+              <input type="file" id="additional-file-input" multiple accept=".pdf,.docx,.xlsx,.xls" style="display:none" onchange="handleAdditionalFiles(this.files)">
+            </div>
+            <div id="additional-file-list" style="margin-top:8px"></div>
+            <div id="additional-file-status" class="status-bar" style="margin-top:4px"></div>
+          </div>
+
           <!-- Financial Summary -->
           <div class="editor-section">
             <h3>Financial Summary</h3>
@@ -479,11 +490,11 @@
           <div class="editor-section">
             <h3>Festival to Provide</h3>
             <div class="quick-add" id="quick-add-btns">
-              <button onclick="quickAdd('Festival Supporter level sponsorship recognition')">Sponsorship Level</button>
-              <button onclick="quickAdd('General admission tickets to the Utah Arts Festival')">Festival Tickets</button>
-              <button onclick="quickAdd('VIP Hospitality Patio passes')">VIP Passes</button>
-              <button onclick="quickAdd('Logo recognition on sponsor tower at the Festival')">Sponsor Tower</button>
-              <button onclick="quickAdd('Logo placement on sponsor page at uaf.org')">Website Logo</button>
+              <button onclick="quickAdd('Festival Supporter level sponsorship recognition (inclusions outlined below)')">Sponsorship Level</button>
+              <button onclick="quickAdd('General Admission tickets to the Utah Arts Festival')">Festival Tickets</button>
+              <button onclick="quickAdd('Hospitality Tickets per day (Thu, Fri, Sat, Sun)')">VIP Passes</button>
+              <button onclick="quickAdd('Logo on Sponsor Tower at the Festival')">Sponsor Tower</button>
+              <button onclick="quickAdd('Logo on Sponsor page on uaf.org')">Website Logo</button>
               <button onclick="quickAdd('On-site logo recognition in association with a Festival program')">On-site Logo</button>
               <button onclick="quickAdd('Logo in printed program')">Program Logo</button>
               <button onclick="quickAdd('Social media mentions')">Social Media</button>
@@ -700,6 +711,71 @@ async function processDocuments() {
   } catch (err) {
     statusEl.textContent = 'Error: ' + err.message;
     btn.disabled = false;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Additional file upload (from editor)
+// ---------------------------------------------------------------------------
+async function handleAdditionalFiles(fileList) {
+  const statusEl = document.getElementById('additional-file-status');
+  const listEl = document.getElementById('additional-file-list');
+
+  const files = Array.from(fileList);
+  if (files.length === 0) return;
+
+  listEl.innerHTML = files.map(f => `<div class="file-item"><span>${escapeHtml(f.name)} (${(f.size / 1024 / 1024).toFixed(1)} MB)</span></div>`).join('');
+  statusEl.innerHTML = '<span class="loading-spinner"></span> Processing documents with AI...';
+
+  const formData = new FormData();
+  for (const file of files) {
+    formData.append('files', file);
+  }
+
+  try {
+    const res = await fetch('/extract', { method: 'POST', body: formData });
+    const result = await res.json();
+
+    if (!result.success) {
+      statusEl.textContent = 'Error: ' + (result.error || 'Unknown error');
+      return;
+    }
+
+    // Merge extracted data into existing partner deliverables
+    const data = result.data;
+    if (data.partner) {
+      if (!document.getElementById('partner-name').value && data.partner.name) {
+        document.getElementById('partner-name').value = data.partner.name;
+      }
+      if (!document.getElementById('partner-contact').value && data.partner.contact) {
+        document.getElementById('partner-contact').value = data.partner.contact;
+      }
+      if (!document.getElementById('partner-email').value && data.partner.email) {
+        document.getElementById('partner-email').value = data.partner.email;
+      }
+      if (!document.getElementById('partner-phone').value && data.partner.phone) {
+        document.getElementById('partner-phone').value = data.partner.phone;
+      }
+    }
+
+    if (data.deliverables && data.deliverables.length > 0) {
+      const pc = document.getElementById('partner-deliverables');
+      // Remove empty placeholder rows
+      pc.querySelectorAll('.deliverable-row').forEach(row => {
+        const desc = row.querySelector('.desc input')?.value?.trim();
+        if (!desc) row.remove();
+      });
+      for (const d of data.deliverables) {
+        addDeliverableRow(pc, d.description, d.dates, d.value);
+      }
+      updateTotals();
+    }
+
+    statusEl.textContent = 'Extraction complete — deliverables added below.';
+    listEl.innerHTML = '';
+    document.getElementById('additional-file-input').value = '';
+  } catch (err) {
+    statusEl.textContent = 'Error: ' + err.message;
   }
 }
 
