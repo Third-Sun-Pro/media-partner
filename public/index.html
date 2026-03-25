@@ -853,6 +853,15 @@ async function loadAgreement(id) {
   }
 
   updateTotals();
+
+  // Restore manually-edited in-kind value if it differs from auto-sum
+  const savedInKind = agreement.financialSummary?.partnerInKindValue || 0;
+  const autoInKind = parseFloat(document.getElementById('partner-inkind').value) || 0;
+  if (savedInKind !== autoInKind) {
+    document.getElementById('partner-inkind').value = savedInKind;
+    inkindManuallyEdited = true;
+    updateTotals();
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -875,6 +884,9 @@ function resetEditor() {
   document.getElementById('partner-deliverables').innerHTML = '';
   document.getElementById('festival-deliverables').innerHTML = '';
   document.getElementById('save-status').textContent = '';
+  document.getElementById('additional-file-list').innerHTML = '';
+  document.getElementById('additional-file-status').textContent = '';
+  document.getElementById('additional-file-input').value = '';
 }
 
 function addDeliverableRow(container, desc = '', dates = '', value = 0, qty = '') {
@@ -1028,9 +1040,12 @@ async function downloadPDF(id) {
       (data.filename || 'Agreement').replace(/_/g, ' ').replace(/\.pdf$/i, '');
     document.getElementById('pdfOverlay').classList.add('open');
   } catch (err) {
-    if (statusEl) {
-      statusEl.textContent = 'PDF error: ' + err.message;
+    const msg = 'PDF error: ' + err.message;
+    if (statusEl && !statusEl.closest('.hidden')) {
+      statusEl.textContent = msg;
       statusEl.style.color = '#e53e3e';
+    } else {
+      alert(msg);
     }
   }
 }

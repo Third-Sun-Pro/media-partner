@@ -69,27 +69,4 @@ function generateAgreementHTML(agreement) {
   return html;
 }
 
-async function generatePDF(agreement) {
-  const puppeteer = require("puppeteer");
-  const html = generateAgreementHTML(agreement);
-
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
-  });
-
-  try {
-    const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: "networkidle0" });
-    const pdfBuffer = await page.pdf({
-      format: "Letter",
-      printBackground: true,
-      margin: { top: "0.5in", right: "0.75in", bottom: "0.5in", left: "0.75in" },
-    });
-    return pdfBuffer;
-  } finally {
-    await browser.close();
-  }
-}
-
-module.exports = { generatePDF, generateAgreementHTML };
+module.exports = { generateAgreementHTML };
