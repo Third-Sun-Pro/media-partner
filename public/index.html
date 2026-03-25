@@ -971,50 +971,35 @@ async function confirmDownloadPDF() {
   btn.textContent = 'Generating...';
 
   try {
-    const container = document.createElement('div');
+    const source = document.getElementById('pdfPreviewBody');
+    const modal = source.closest('.pdf-modal');
+    const overlay = document.getElementById('pdfOverlay');
 
-    // Parse the full HTML template to extract styles and body content
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(pendingPdfData.html, 'text/html');
-    const styles = doc.querySelectorAll('style');
-    const bodyContent = doc.body ? doc.body.innerHTML : pendingPdfData.html;
+    // Temporarily remove overflow/height/padding constraints for capture
+    const prevModal = modal.style.cssText;
+    const prevOverlay = overlay.style.cssText;
+    const prevSource = source.style.cssText;
+    modal.style.overflow = 'visible';
+    modal.style.maxHeight = 'none';
+    overlay.style.overflow = 'visible';
+    overlay.style.maxHeight = 'none';
+    source.style.padding = '0';
 
-    // Inject styles, rewriting "body" selectors to target the container
-    styles.forEach(s => {
-      const clone = s.cloneNode(true);
-      clone.textContent = clone.textContent.replace(/\bbody\b/g, '.pdf-render-root');
-      container.appendChild(clone);
-    });
-    const content = document.createElement('div');
-    content.innerHTML = bodyContent;
-    container.appendChild(content);
-
-    container.className = 'pdf-render-root';
-    container.style.position = 'fixed';
-    container.style.left = '0';
-    container.style.top = '0';
-    container.style.width = '8.5in';
-    container.style.background = '#fff';
-    container.style.color = '#1a1a1a';
-    container.style.colorScheme = 'light';
-    container.style.zIndex = '-1';
-    container.style.overflow = 'hidden';
-    document.body.appendChild(container);
-
-    // Wait for fonts and images to load
     await document.fonts.ready;
-    await new Promise(r => setTimeout(r, 500));
 
     await html2pdf().set({
-      margin: [0.5, 0.75, 0.5, 0.75],
+      margin: [0.3, 0.5, 0.3, 0.5],
       filename: pendingPdfData.filename,
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff' },
+      html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', scrollY: 0 },
       jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' },
       pagebreak: { mode: ['avoid-all', 'css', 'legacy'] },
-    }).from(container).save();
+    }).from(source).save();
 
-    document.body.removeChild(container);
+    // Restore original styles
+    modal.style.cssText = prevModal;
+    overlay.style.cssText = prevOverlay;
+    source.style.cssText = prevSource;
   } catch (err) {
     alert('PDF download failed: ' + err.message);
   } finally {
