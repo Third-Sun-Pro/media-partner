@@ -29,6 +29,11 @@ for (const key of REQUIRED_ENV) {
   }
 }
 
+// In production, DATA_DIR must point outside the deploy folder or every push wipes saved agreements.
+if (process.env.NODE_ENV === "production" && !process.env.DATA_DIR) {
+  log("warn", "DATA_DIR is not set in production — agreements will be wiped on the next Hostinger deploy. Set DATA_DIR=../data (or another path outside the app folder).");
+}
+
 const app = express();
 const upload = multer({
   storage: multer.memoryStorage(),
