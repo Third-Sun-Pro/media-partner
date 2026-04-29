@@ -67,6 +67,24 @@ Deployed at **mediaagreements.tsapp.us** on Hostinger (auto-deploy from GitHub p
 
 `.env` created **manually** on the server. Hostinger wipes the app directory on deploy — `data/agreements.json` should live outside the deploy folder if you want it to persist (verify path before any push that might reset it).
 
+## How to Restore from Backup
+
+If `agreements.json` ever gets corrupted, accidentally cleared, or otherwise loses data, recover it from a daily backup snapshot:
+
+1. Get into the production data folder. Two ways:
+   - **hPanel File Manager** — log into hpanel.hostinger.com → File Manager → navigate to the path one level above where `server.js` lives (e.g. `/domains/mediaagreements.tsapp.us/data/`). The `data/` folder is a *sibling* of the deploy folder, not inside it.
+   - **SSH** — `ssh` in and `cd` into the directory `DATA_DIR` points to (typically `../data` relative to the app root).
+2. List the files. You should see `agreements.json` (the live file) plus zero or more `agreements.YYYY-MM-DD.json` backup snapshots.
+3. Pick the backup from the date you want to restore to (e.g. `agreements.2026-04-15.json` for the state at the start of April 15).
+4. **Make a safety copy of the current live file first** in case the restore is wrong: `cp agreements.json agreements.before-restore.json` (or right-click → copy in File Manager).
+5. Copy the chosen backup over the live file: `cp agreements.2026-04-15.json agreements.json` (or in File Manager: rename the backup to `agreements.json`, overwriting the live one).
+6. The app will pick up the change on the next request — no restart needed. Refresh the agreements list in the UI to confirm.
+
+Notes:
+- Backups capture the state **before** the first write of that day. So `agreements.2026-04-15.json` contains everything as of end-of-day April 14.
+- Backups older than 30 days auto-prune — if the data loss is older than that, the backup is gone too.
+- Backup is best-effort; if it ever fails, the warning is logged but the save still succeeds.
+
 ## Git
 
 - Remote: github.com/Third-Sun-Pro/media-partner (public — required for scheduled remote agents)
