@@ -42,6 +42,7 @@ Server **exits on startup** if `APP_PASSWORD` or `ANTHROPIC_API_KEY` is missing.
 - `public/index.html` — Single-page web UI
 - `public/uaf-logo.png` / `uaf-logo-black.png` — UAF branding assets
 - `data/agreements.json` — Stored agreements (gitignored; lives outside deploy folder in production)
+- `data/agreements.YYYY-MM-DD.json` — Daily backup snapshots, taken automatically once per day before the first write. Kept for 30 days, then auto-pruned. Restore by copying the desired backup over `agreements.json`.
 - `tests/` — Vitest suite
 
 ## Endpoints

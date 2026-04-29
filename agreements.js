@@ -4,10 +4,36 @@ const crypto = require("crypto");
 
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, "data");
 const AGREEMENTS_PATH = path.join(DATA_DIR, "agreements.json");
+const BACKUP_RETENTION_DAYS = 30;
 
 function ensureDataDir() {
   if (!fs.existsSync(DATA_DIR)) {
     fs.mkdirSync(DATA_DIR, { recursive: true });
+  }
+}
+
+// Once per day, snapshot the current agreements.json before overwriting it.
+// Backups live alongside the live file (so they survive Hostinger deploys via DATA_DIR).
+// Failures here never block a save — backup is best-effort.
+function backupIfNeeded() {
+  try {
+    if (!fs.existsSync(AGREEMENTS_PATH)) return;
+    const today = new Date().toISOString().split("T")[0];
+    const backupPath = path.join(DATA_DIR, `agreements.${today}.json`);
+    if (fs.existsSync(backupPath)) return;
+    fs.copyFileSync(AGREEMENTS_PATH, backupPath);
+    pruneOldBackups();
+  } catch (err) {
+    process.stderr.write(JSON.stringify({ time: new Date().toISOString(), level: "warn", msg: "backup failed", err: String(err) }) + "\n");
+  }
+}
+
+function pruneOldBackups() {
+  const cutoff = Date.now() - BACKUP_RETENTION_DAYS * 24 * 60 * 60 * 1000;
+  for (const file of fs.readdirSync(DATA_DIR)) {
+    if (!/^agreements\.\d{4}-\d{2}-\d{2}\.json$/.test(file)) continue;
+    const filePath = path.join(DATA_DIR, file);
+    if (fs.statSync(filePath).mtimeMs < cutoff) fs.unlinkSync(filePath);
   }
 }
 
@@ -22,6 +48,7 @@ function readAll() {
 
 function writeAll(entries) {
   ensureDataDir();
+  backupIfNeeded();
   fs.writeFileSync(AGREEMENTS_PATH, JSON.stringify(entries, null, 2));
 }
 
